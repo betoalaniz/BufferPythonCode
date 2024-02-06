@@ -1,0 +1,47 @@
+import arcpy
+import os
+from sys import argv
+
+def NotificationBuffer():  # Notification Maps Model
+
+    # To allow overwriting outputs change overwriteOutput option to True.
+    arcpy.env.overwriteOutput = True
+    
+    
+# ADD PARCEL BOUNDARIES LAYER TO MAP
+arcpy.management.MakeFeatureLayer("M:\\01_GIS\\01_Data\\Admin_Boundaries\\Parcel Boundaries\\Parcel_Ownership_FEB22.shp")
+ 
+parcel_layer = "Parcel_Ownership_FEB22_Layer"
+
+select_parcel = input("Please enter Parcel ID number: ")
+
+# SELECT NEW SELECTION FROM PARCEL
+
+arcpy.management.SelectLayerByAttribute('Parcel_Ownership_FEB22_Layer', 'NEW_SELECTION','"PROP_ID" ='+select_parcel)
+
+
+# MAKE NEW LAYER FROM SELECTED PARCEL
+
+arcpy.management.CopyFeatures('Parcel_Ownership_FEB22_Layer')
+
+
+# MAKE BUFFER FROM NEW LAYER
+
+arcpy.analysis.Buffer('Parcel_Ownership_FEB22_Layer_CopyFeatures','newbuffer','200 Feet')
+
+# SELECT PARCELS WITHIN BUFFER
+
+arcpy.management.SelectLayerByLocation('Parcel_Ownership_FEB22_Layer','Intersect', 'newbuffer')
+
+# DESELECT PARCEL OF SIGNIFICANCE WITHIN BUFFER
+
+arcpy.management.SelectLayerByAttribute('Parcel_Ownership_FEB22_Layer', 'REMOVE_FROM_SELECTION','"PROP_ID" ='+select_parcel)
+
+# CREATES NEW LAYER WITH SELECTED PARCELS
+
+arcpy.management.CopyFeatures('Parcel_Ownership_FEB22_Layer')
+
+
+# PRINTS OUT MESSAGE
+
+print("Process has completed. ")
